@@ -19,8 +19,10 @@ class EmptyResponseError(RuntimeError): pass
 class ServerError(RuntimeError): pass
 
 
-def _random_str(length: int = 8) -> str:
-    return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
+def _random_str(length: int = None) -> str:
+    if length is None:
+        length = random.randint(8, 11)
+    return "".join(random.choices(string.digits, k=length))
 
 
 # ── 注册客户端 ────────────────────────────────────────────
