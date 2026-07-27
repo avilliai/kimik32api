@@ -19,16 +19,20 @@ class EmptyResponseError(RuntimeError): pass
 class ServerError(RuntimeError): pass
 
 
-def _random_str(length: int = None) -> str:
+def _random_str(length: int = None,only_number=False) -> str:
+
     if length is None:
         length = random.randint(8, 11)
-    return "".join(random.choices(string.digits, k=length))
+    if only_number:
+        return "".join(random.choices(string.digits, k=length))
+    else:
+        return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
 
 
 # ── 注册客户端 ────────────────────────────────────────────
 class Kimik3Register:
     async def run(self) -> Optional[dict]:
-        name = _random_str(6)
+        name = _random_str(only_number=True)
         email = f"{name}@qq.com"
         password = "pwd" + _random_str(8)
 
