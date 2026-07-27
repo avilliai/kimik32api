@@ -41,7 +41,7 @@ async def chat_completions(request: Request):
     # 无限重试外壳 (最多试3个号)
     async def _execute_with_retry() -> tuple[Optional[AccountState], any]:
         acc = await cm.get_next()
-        for attempt in range(3):
+        for attempt in range(6):
             try:
                 # 只获取生成器并不消费
                 gen = stream_kimik3_response(prompt_text, acc)

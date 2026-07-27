@@ -160,7 +160,7 @@ class CookieManager:
                 f"⚠️ 账号 [{acc.email}] 失败: {reason} | 当前连续失败: {acc.fail_count}/3 | 剩余 Credits: {acc.remaining}")
 
             # 判定条件：连续失败 >= 3 次 且 额度 credits <= 0
-            should_destroy = (acc.fail_count >= 3 and acc.remaining <= 0) or acc.quota_exhausted
+            should_destroy = (acc.fail_count >= 3 and acc.remaining <= 0) or acc.quota_exhausted or acc.fail_count>5
 
             if should_destroy:
                 log.error(f"💥 账号 [{acc.email}] 满足销毁条件(连续失败3次且额度为0)，正在彻底废弃并重新注册...")
