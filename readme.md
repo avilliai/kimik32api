@@ -1,7 +1,5 @@
 上游已增加cf turnstile验证     
 有能力的自己过，仓库不提供解决方案   
-
-上游已不再提供免费credits，遗憾退场
 ## 安装python
 [安装python3.11](https://mirrors.huaweicloud.com/python/3.11.0/python-3.11.0-amd64.exe)
 
