@@ -1,0 +1,844 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kimik3 2API · 管理后台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5f5f5;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --border-light: #f3f4f6;
+  --text: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --primary: #111827;
+  --primary-hover: #374151;
+  --green: #16a34a;
+  --green-bg: #dcfce7;
+  --red: #dc2626;
+  --red-bg: #fee2e2;
+  --yellow: #d97706;
+  --yellow-bg: #fef3c7;
+  --blue: #2563eb;
+  --blue-bg: #dbeafe;
+  --purple: #7c3aed;
+  --purple-bg: #ede9fe;
+  --radius: 8px;
+  --radius-sm: 5px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -1px rgba(0,0,0,.04);
+}
+
+body { font-family:'Inter',-apple-system,sans-serif; background:var(--bg); color:var(--text); font-size:14px; line-height:1.5; min-height:100vh; }
+
+/* ── Nav ── */
+nav { background:var(--surface); border-bottom:1px solid var(--border); padding:0 24px; height:56px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+.nav-left { display:flex; align-items:center; gap:28px; }
+.nav-brand { display:flex; align-items:center; gap:8px; font-weight:700; font-size:15px; color:var(--text); text-decoration:none; }
+.nav-brand svg { color:var(--purple); }
+.nav-links { display:flex; gap:4px; }
+.nav-link { padding:6px 12px; border-radius:var(--radius-sm); color:var(--text-secondary); font-size:13px; cursor:pointer; transition:all .15s; font-weight:500; }
+.nav-link:hover { background:var(--border-light); color:var(--text); }
+.nav-link.active { background:var(--text); color:#fff; }
+.nav-right { display:flex; align-items:center; gap:8px; }
+.nav-badge { padding:3px 8px; border-radius:4px; font-size:12px; font-weight:600; background:var(--green-bg); color:var(--green); }
+
+/* ── Main ── */
+.main { max-width:1280px; margin:0 auto; padding:28px 24px 60px; }
+
+/* ── Config bar ── */
+.config-bar { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px; display:flex; align-items:center; gap:16px; margin-bottom:20px; flex-wrap:wrap; box-shadow:var(--shadow); }
+.config-group { display:flex; align-items:center; gap:8px; }
+.config-label { font-size:12px; color:var(--text-secondary); font-weight:500; }
+.config-input { padding:5px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; font-family:inherit; color:var(--text); background:var(--surface); width:220px; }
+.config-input:focus { outline:none; border-color:var(--text); }
+
+/* ── Stat cards ── */
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
+.stats-grid-2 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow); }
+.stat-label { font-size:12px; color:var(--text-secondary); margin-bottom:6px; font-weight:500; }
+.stat-value { font-size:26px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums; transition:color .2s; }
+.stat-value.green { color:var(--green); }
+.stat-value.red   { color:var(--red); }
+.stat-value.blue  { color:var(--blue); }
+.stat-value.muted { color:var(--text-muted); }
+.stat-value.purple { color:var(--purple); }
+
+/* ── Table card ── */
+.table-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+
+/* ── Toolbar ── */
+.toolbar { padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.toolbar-left { display:flex; align-items:center; gap:8px; }
+.toolbar-right { display:flex; align-items:center; gap:6px; }
+
+/* Filter tabs */
+.filter-tabs { display:flex; gap:2px; background:var(--border-light); padding:3px; border-radius:7px; }
+.filter-tab { padding:5px 12px; border-radius:5px; font-size:12px; font-weight:500; cursor:pointer; transition:all .15s; color:var(--text-secondary); display:flex; align-items:center; gap:5px; border:none; background:none; }
+.filter-tab.active { background:var(--surface); color:var(--text); box-shadow:var(--shadow); }
+.filter-tab .count { font-weight:600; }
+.filter-tab .count.green { color:var(--green); }
+.filter-tab .count.red   { color:var(--red); }
+.filter-tab .count.yellow { color:var(--yellow); }
+
+/* Buttons */
+.btn { display:inline-flex; align-items:center; gap:5px; padding:7px 14px; border-radius:var(--radius-sm); font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; border:1px solid transparent; font-family:inherit; white-space:nowrap; }
+.btn-primary { background:var(--text); color:#fff; border-color:var(--text); }
+.btn-primary:hover { background:var(--primary-hover); }
+.btn-secondary { background:var(--surface); color:var(--text); border-color:var(--border); }
+.btn-secondary:hover { background:var(--border-light); }
+.btn-ghost { background:transparent; color:var(--text-secondary); border-color:transparent; }
+.btn-ghost:hover { background:var(--border-light); color:var(--text); }
+.btn-danger { background:var(--red-bg); color:var(--red); border-color:#fca5a5; }
+.btn-danger:hover { background:#fecaca; }
+.btn-purple { background:var(--purple-bg); color:var(--purple); border-color:#ddd6fe; }
+.btn-purple:hover { background:#ddd6fe; }
+.btn-sm { padding:5px 10px; font-size:12px; }
+
+/* ── Table ── */
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; }
+thead tr { border-bottom:1px solid var(--border); }
+th { padding:10px 16px; text-align:left; font-size:12px; font-weight:600; color:var(--text-secondary); white-space:nowrap; background:var(--border-light); }
+th:first-child { width:40px; }
+td { padding:12px 16px; border-bottom:1px solid var(--border-light); vertical-align:middle; }
+tbody tr:last-child td { border-bottom:none; }
+tbody tr { transition:background .1s; }
+tbody tr:hover { background:#fafafa; }
+tbody tr.selected { background:#eff6ff; }
+input[type=checkbox] { width:15px; height:15px; accent-color:var(--text); cursor:pointer; }
+
+.token-cell { display:flex; align-items:center; gap:6px; font-family:'SF Mono','Consolas',monospace; font-size:12px; }
+.copy-btn { background:none; border:none; cursor:pointer; color:var(--text-muted); padding:2px; border-radius:3px; transition:color .1s; display:inline-flex; }
+.copy-btn:hover { color:var(--text); }
+
+.badge { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; }
+.badge-green  { background:var(--green-bg);    color:var(--green); }
+.badge-red    { background:var(--red-bg);      color:var(--red); }
+.badge-yellow { background:var(--yellow-bg);   color:var(--yellow); }
+.badge-gray   { background:var(--border-light);color:var(--text-secondary); }
+.dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.dot-pulse { animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.remaining-cell { display:flex; align-items:center; gap:8px; min-width:100px; }
+.mini-bar { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+.mini-fill { height:100%; border-radius:2px; background:var(--green); transition:width .4s ease; }
+.mini-fill.low { background:var(--yellow); }
+.mini-fill.empty { background:var(--red); }
+.remaining-num { font-size:12px; font-weight:600; min-width:24px; text-align:right; }
+
+.actions { display:flex; align-items:center; gap:2px; }
+.action-btn { background:none; border:none; cursor:pointer; padding:5px; border-radius:4px; color:var(--text-muted); transition:all .1s; display:inline-flex; }
+.action-btn:hover { background:var(--border-light); color:var(--text); }
+.action-btn.danger:hover { background:var(--red-bg); color:var(--red); }
+.action-btn:disabled { opacity:.4; cursor:not-allowed; }
+
+/* ── Pagination ── */
+.pagination { padding:14px 20px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.page-info { font-size:12px; color:var(--text-secondary); }
+.page-controls { display:flex; align-items:center; gap:6px; }
+.page-btn { padding:5px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); cursor:pointer; font-size:12px; color:var(--text); transition:all .1s; font-family:inherit; }
+.page-btn:hover:not(:disabled) { background:var(--border-light); }
+.page-btn:disabled { opacity:.4; cursor:not-allowed; }
+.page-btn.active { background:var(--text); color:#fff; border-color:var(--text); }
+.per-page-select { padding:5px 8px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; background:var(--surface); cursor:pointer; font-family:inherit; }
+
+/* ── Bulk bar ── */
+.bulk-bar { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--text); color:#fff; border-radius:10px; padding:10px 16px; display:flex; align-items:center; gap:10px; box-shadow:0 8px 24px rgba(0,0,0,.2); transition:transform .25s cubic-bezier(.34,1.56,.64,1); z-index:200; white-space:nowrap; }
+.bulk-bar.visible { transform:translateX(-50%) translateY(0); }
+.bulk-count { background:rgba(255,255,255,.15); padding:2px 8px; border-radius:4px; font-size:12px; font-weight:600; }
+.bulk-divider { width:1px; height:20px; background:rgba(255,255,255,.2); }
+.bulk-btn { background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); color:#fff; padding:5px 12px; border-radius:5px; font-size:12px; font-weight:500; cursor:pointer; transition:background .1s; font-family:inherit; }
+.bulk-btn:hover { background:rgba(255,255,255,.2); }
+.bulk-btn.danger { background:rgba(220,38,38,.4); border-color:rgba(220,38,38,.5); }
+.bulk-btn.danger:hover { background:rgba(220,38,38,.6); }
+
+/* ── Toast ── */
+.toast { position:fixed; top:70px; right:20px; background:var(--text); color:#fff; padding:10px 16px; border-radius:var(--radius); font-size:13px; font-weight:500; box-shadow:var(--shadow-md); transform:translateX(120%); transition:transform .25s ease; z-index:300; }
+.toast.show { transform:translateX(0); }
+.toast.success { background:var(--green); }
+.toast.error   { background:var(--red); }
+
+/* ── Empty ── */
+.empty-state { padding:60px 20px; text-align:center; color:var(--text-secondary); }
+.empty-icon { font-size:32px; margin-bottom:12px; }
+
+/* ── Spinner ── */
+.spinner { display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:spin .5s linear infinite; }
+.spinner-dark { border-color:var(--border); border-top-color:var(--text); }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── Modal ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:400; opacity:0; pointer-events:none; transition:opacity .2s; }
+.modal-overlay.open { opacity:1; pointer-events:auto; }
+.modal { background:var(--surface); border-radius:12px; padding:24px; width:420px; max-width:92vw; box-shadow:0 20px 60px rgba(0,0,0,.15); transform:scale(.95); transition:transform .2s; }
+.modal-overlay.open .modal { transform:scale(1); }
+.modal-title { font-size:16px; font-weight:700; margin-bottom:4px; }
+.modal-desc { font-size:13px; color:var(--text-secondary); margin-bottom:20px; }
+.modal-label { display:block; font-size:12px; color:var(--text-secondary); font-weight:500; margin-bottom:6px; }
+.modal-input { width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:14px; font-family:inherit; color:var(--text); background:var(--surface); outline:none; transition:border-color .15s; }
+.modal-input:focus { border-color:var(--text); }
+.modal-textarea { width:100%; height:160px; border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; font-size:12px; font-family:'SF Mono',monospace; resize:vertical; color:var(--text); outline:none; }
+.modal-textarea:focus { border-color:var(--text); }
+.modal-hint { font-size:12px; color:var(--text-secondary); margin:8px 0 0; }
+.modal-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:20px; }
+
+/* ── Register progress bar ── */
+.progress-bar { height:6px; background:var(--border); border-radius:3px; overflow:hidden; margin-top:12px; }
+.progress-fill { height:100%; background:var(--purple); border-radius:3px; transition:width .4s; }
+
+/* ── API info box ── */
+.api-box { background:var(--border-light); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:20px; }
+.api-box-title { font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:10px; text-transform:uppercase; letter-spacing:.5px; }
+.api-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+.api-row:last-child { margin-bottom:0; }
+.api-badge { padding:2px 8px; border-radius:3px; font-size:11px; font-weight:700; font-family:monospace; }
+.api-badge.get  { background:#dcfce7; color:#15803d; }
+.api-badge.post { background:#dbeafe; color:#1d4ed8; }
+.api-url { font-family:'SF Mono',monospace; font-size:12px; color:var(--text); }
+.api-desc { font-size:12px; color:var(--text-muted); margin-left:auto; }
+
+@media (max-width:768px) {
+  .stats-grid, .stats-grid-2 { grid-template-columns:repeat(2,1fr); }
+  .nav-links { display:none; }
+  .api-box { display:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-left">
+    <a class="nav-brand" href="#">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+      </svg>
+      Kimik3 2API
+    </a>
+    <div class="nav-links">
+      <div class="nav-link active">账号池</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge" id="nav-status">未连接</span>
+    <button class="btn btn-ghost btn-sm" onclick="fetchData()" id="refresh-btn">
+      <span id="refresh-icon">⟳</span> 刷新
+    </button>
+  </div>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ── Import Modal ── -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal">
+    <div class="modal-title">导入账号</div>
+    <div class="modal-desc">粘贴 JSON 数组，每个对象包含 email / password / token 字段</div>
+    <textarea class="modal-textarea" id="import-textarea" placeholder='[{"email":"...","password":"...","token":"...","available_credits":100}]'></textarea>
+    <div class="modal-hint" id="import-hint">支持批量粘贴，重复账号自动跳过</div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('import-modal')">取消</button>
+      <button class="btn btn-primary" id="import-btn" onclick="doImport()">导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Register Modal ── -->
+<div class="modal-overlay" id="register-modal">
+  <div class="modal" style="width:380px">
+    <div class="modal-title">批量注册账号</div>
+    <div class="modal-desc">后台并发注册，注册成功后自动加入账号池</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px">
+      <div>
+        <label class="modal-label">注册数量</label>
+        <input class="modal-input" id="register-count" type="number" min="1" max="200" placeholder="例: 10" onkeydown="if(event.key==='Enter')doRegister()">
+      </div>
+      <div>
+        <label class="modal-label">并发线程数</label>
+        <input class="modal-input" id="register-concurrency" type="number" min="1" max="2" value="1" placeholder="1-2">
+      </div>
+    </div>
+    <div class="modal-hint" id="register-hint">任务在后台线程运行，完成后自动写入账号池。</div>
+    <div class="progress-bar" id="register-progress-wrap" style="display:none">
+      <div class="progress-fill" id="register-progress" style="width:0%"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('register-modal')">取消</button>
+      <button class="btn btn-purple" id="register-btn" onclick="doRegister()">
+        <span id="register-btn-text">开始注册</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Config -->
+  <div class="config-bar">
+    <div class="config-group">
+      <span class="config-label">Base URL</span>
+      <input class="config-input" id="base-url" placeholder="http://localhost:8009">
+    </div>
+    <div class="config-group">
+      <span class="config-label">API Key</span>
+      <input class="config-input" id="api-key" type="password" placeholder="留空不鉴权">
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="fetchData()">连接</button>
+    <span id="conn-status" style="font-size:12px;color:var(--text-muted)">未连接</span>
+  </div>
+
+  <!-- API 接口速览 -->
+  <div class="api-box">
+    <div class="api-box-title">OpenAI 兼容接口</div>
+    <div class="api-row">
+      <span class="api-badge get">GET</span>
+      <span class="api-url">/v1/models</span>
+      <span class="api-desc">模型列表</span>
+    </div>
+    <div class="api-row">
+      <span class="api-badge post">POST</span>
+      <span class="api-url">/v1/images/generations</span>
+      <span class="api-desc">图像生成（OpenAI 格式）</span>
+    </div>
+    <div class="api-row">
+      <span class="api-badge post">POST</span>
+      <span class="api-url">/v1/chat/completions</span>
+      <span class="api-desc">Chat 兼容（返回 Markdown 图片）</span>
+    </div>
+  </div>
+
+  <!-- Stats row 1 -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">账号总数</div>
+      <div class="stat-value" id="s-total">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">账号正常</div>
+      <div class="stat-value green" id="s-alive">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">账号耗尽</div>
+      <div class="stat-value muted" id="s-empty">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">账号失效</div>
+      <div class="stat-value red" id="s-dead">—</div>
+    </div>
+  </div>
+
+  <!-- Stats row 2 -->
+  <div class="stats-grid-2">
+    <div class="stat-card">
+      <div class="stat-label">总剩余额度</div>
+      <div class="stat-value blue" id="s-remaining">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">平均每账号</div>
+      <div class="stat-value" id="s-avg">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">上次刷新</div>
+      <div class="stat-value" style="font-size:13px;padding-top:4px" id="s-time">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">存活率</div>
+      <div class="stat-value purple" id="s-rate">—</div>
+    </div>
+  </div>
+
+  <!-- Table card -->
+  <div class="table-card">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="setFilter('all',this)">
+            全部 <span class="count" id="ft-all">0</span>
+          </button>
+          <button class="filter-tab" onclick="setFilter('alive',this)">
+            正常 <span class="count green" id="ft-alive">0</span>
+          </button>
+          <button class="filter-tab" onclick="setFilter('empty',this)">
+            耗尽 <span class="count yellow" id="ft-empty">0</span>
+          </button>
+          <button class="filter-tab" onclick="setFilter('dead',this)">
+            失效 <span class="count red" id="ft-dead">0</span>
+          </button>
+        </div>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-secondary btn-sm" onclick="forceRefresh()">↺ 保活刷新</button>
+        <button class="btn btn-secondary btn-sm" onclick="openImport()">↑ 导入</button>
+        <button class="btn btn-purple btn-sm" onclick="openRegisterModal()">✦ 注册</button>
+        <button class="btn btn-primary btn-sm" onclick="openImport()">+ 添加</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="check-all" onchange="toggleAll(this)"></th>
+            <th>Email</th>
+            <th>Token</th>
+            <th>状态</th>
+            <th>剩余额度</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="token-tbody">
+          <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">◌</div><div>点击「连接」加载账号列表</div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <div class="page-info" id="page-info">—</div>
+      <div class="page-controls">
+        <select class="per-page-select" onchange="setPerPage(+this.value)">
+          <option value="50">50 / 页</option>
+          <option value="100">100 / 页</option>
+          <option value="200">200 / 页</option>
+        </select>
+        <button class="page-btn" onclick="goPage(1)" id="btn-first">«</button>
+        <button class="page-btn" onclick="goPage(state.page-1)" id="btn-prev">‹</button>
+        <span id="page-nums" style="display:flex;gap:4px"></span>
+        <button class="page-btn" onclick="goPage(state.page+1)" id="btn-next">›</button>
+        <button class="page-btn" onclick="goPage(state.totalPages)" id="btn-last">»</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk bar -->
+<div class="bulk-bar" id="bulk-bar">
+  <span class="bulk-count" id="bulk-count">0 项</span>
+  <div class="bulk-divider"></div>
+  <button class="bulk-btn" onclick="bulkRefresh()">刷新</button>
+  <button class="bulk-btn" onclick="bulkDisable()">禁用</button>
+  <button class="bulk-btn" onclick="bulkEnable()">启用</button>
+  <button class="bulk-btn danger" onclick="bulkDelete()">删除</button>
+  <div class="bulk-divider"></div>
+  <button class="bulk-btn" onclick="clearSelection()">✕</button>
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────
+const state = {
+  tokens: [], filtered: [],
+  filter: 'all', page: 1, perPage: 50, totalPages: 1,
+  selected: new Set(), maxRemaining: 1,
+};
+
+// ── Helpers ──────────────────────────────────────────────────────
+const getBase = () => (document.getElementById('base-url').value || window.location.origin).replace(/\/$/, '');
+function getHeaders() {
+  const k = document.getElementById('api-key').value.trim();
+  const h = { 'Content-Type': 'application/json' };
+  if (k) h['Authorization'] = `Bearer ${k}`;
+  return h;
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `toast show ${type}`;
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+function animateNum(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = parseFloat(el.textContent.replace(/[^0-9.]/g, '')) || 0;
+  const t0 = performance.now();
+  const step = now => {
+    const p = Math.min((now - t0) / 500, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(start + (target - start) * e).toLocaleString();
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+async function api(method, path, body) {
+  const res = await fetch(`${getBase()}${path}`, {
+    method, headers: getHeaders(),
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+// ── Fetch & render ────────────────────────────────────────────────
+async function fetchData() {
+  const btn = document.getElementById('refresh-btn');
+  const icon = document.getElementById('refresh-icon');
+  icon.innerHTML = '<span class="spinner spinner-dark" style="border-top-color:var(--text)"></span>';
+  btn.disabled = true;
+  document.getElementById('conn-status').textContent = '连接中...';
+
+  try {
+    const data = await api('GET', '/admin/tokens/detail');
+    state.tokens = data.tokens || [];
+    state.maxRemaining = Math.max(...state.tokens.map(t => t.remaining), 1);
+
+    updateStats(data.summary);
+    applyFilter();
+    updateFilterCounts();
+
+    const ts = data.summary.last_refresh || new Date().toLocaleTimeString('zh-CN');
+    document.getElementById('s-time').textContent = ts;
+    setNavStatus(true, state.tokens.length);
+    document.getElementById('conn-status').textContent = `已连接 · ${state.tokens.length} 个账号`;
+    toast(`已加载 ${state.tokens.length} 个账号`, 'success');
+  } catch(e) {
+    setNavStatus(false);
+    document.getElementById('conn-status').textContent = `连接失败: ${e.message}`;
+    toast(`连接失败: ${e.message}`, 'error');
+  } finally {
+    icon.innerHTML = '⟳'; btn.disabled = false;
+  }
+}
+
+function setNavStatus(ok, count = 0) {
+  const el = document.getElementById('nav-status');
+  if (ok) {
+    el.textContent = `已连接 ${count}`;
+    el.style.background = 'var(--green-bg)'; el.style.color = 'var(--green)';
+  } else {
+    el.textContent = '未连接';
+    el.style.background = 'var(--red-bg)'; el.style.color = 'var(--red)';
+  }
+}
+
+async function forceRefresh() {
+  toast('触发保活刷新中...');
+  try {
+    await api('POST', '/admin/tokens/refresh');
+    toast('刷新任务已启动，稍后点击连接查看结果', 'success');
+    setTimeout(fetchData, 3000);
+  } catch(e) { toast(`刷新失败: ${e.message}`, 'error'); }
+}
+
+function updateStats(s) {
+  animateNum('s-total', s.total || 0);
+  animateNum('s-alive', s.alive || 0);
+  animateNum('s-remaining', s.total_remaining || 0);
+  const dead  = state.tokens.filter(t => !t.is_alive && !t.disabled).length;
+  const empty = state.tokens.filter(t =>  t.is_alive && t.remaining === 0).length;
+  animateNum('s-dead', dead);
+  animateNum('s-empty', empty);
+  const avg  = s.alive > 0 ? Math.round(s.total_remaining / s.alive) : 0;
+  const rate = s.total > 0 ? (s.alive / s.total * 100).toFixed(1) + '%' : '—';
+  document.getElementById('s-avg').textContent  = avg.toLocaleString();
+  document.getElementById('s-rate').textContent = rate;
+}
+
+function updateFilterCounts() {
+  document.getElementById('ft-all').textContent   = state.tokens.length;
+  document.getElementById('ft-alive').textContent = state.tokens.filter(t => t.is_alive && t.remaining > 0).length;
+  document.getElementById('ft-empty').textContent = state.tokens.filter(t => t.is_alive && t.remaining === 0).length;
+  document.getElementById('ft-dead').textContent  = state.tokens.filter(t => !t.is_alive).length;
+}
+
+function setFilter(f, el) {
+  state.filter = f; state.page = 1;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  applyFilter();
+}
+
+function applyFilter() {
+  const f = state.filter;
+  state.filtered = f === 'alive' ? state.tokens.filter(t => t.is_alive && t.remaining > 0)
+    : f === 'empty' ? state.tokens.filter(t => t.is_alive && t.remaining === 0)
+    : f === 'dead'  ? state.tokens.filter(t => !t.is_alive)
+    : [...state.tokens];
+  state.totalPages = Math.max(1, Math.ceil(state.filtered.length / state.perPage));
+  state.page = Math.min(state.page, state.totalPages);
+  renderTable(); renderPagination();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('token-tbody');
+  const start = (state.page - 1) * state.perPage;
+  const items = state.filtered.slice(start, start + state.perPage);
+
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">◌</div><div>暂无账号</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = items.map(t => {
+    const checked   = state.selected.has(t.index) ? 'checked' : '';
+    const rowClass  = state.selected.has(t.index) ? 'selected' : '';
+    let badge;
+    if (t.disabled)       badge = `<span class="badge badge-gray"><span class="dot"></span>禁用</span>`;
+    else if (!t.is_alive) badge = `<span class="badge badge-red"><span class="dot"></span>失效</span>`;
+    else if (t.remaining === 0) badge = `<span class="badge badge-yellow"><span class="dot"></span>耗尽</span>`;
+    else badge = `<span class="badge badge-green"><span class="dot dot-pulse"></span>正常</span>`;
+
+    const pct = Math.min(t.remaining / state.maxRemaining * 100, 100);
+    const barClass = t.remaining === 0 ? 'empty' : pct < 30 ? 'low' : '';
+
+    return `<tr class="${rowClass}" data-idx="${t.index}">
+      <td><input type="checkbox" ${checked} onchange="toggleSelect(${t.index},this)"></td>
+      <td style="font-size:12px;color:var(--text-secondary);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.email}</td>
+      <td>
+        <div class="token-cell">
+          <span>${t.token_hint}</span>
+          <button class="copy-btn" onclick="copyText('${t.token_hint}')" title="复制">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+        </div>
+      </td>
+      <td>${badge}</td>
+      <td>
+        <div class="remaining-cell">
+          <div class="mini-bar"><div class="mini-fill ${barClass}" style="width:${pct}%"></div></div>
+          <span class="remaining-num">${t.remaining}</span>
+        </div>
+      </td>
+      <td>
+        <div class="actions">
+          <button class="action-btn" title="刷新" onclick="refreshOne(${t.index},this)">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          </button>
+          <button class="action-btn danger" title="删除" onclick="deleteOne(${t.index})">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPagination() {
+  const { page, totalPages, filtered, perPage } = state;
+  const start = filtered.length > 0 ? (page - 1) * perPage + 1 : 0;
+  const end   = Math.min(page * perPage, filtered.length);
+  document.getElementById('page-info').textContent =
+    filtered.length > 0 ? `第 ${page}/${totalPages} 页 · 共 ${filtered.length} 条` : '暂无数据';
+  document.getElementById('btn-first').disabled = page <= 1;
+  document.getElementById('btn-prev').disabled  = page <= 1;
+  document.getElementById('btn-next').disabled  = page >= totalPages;
+  document.getElementById('btn-last').disabled  = page >= totalPages;
+  const nums = document.getElementById('page-nums');
+  const delta = 2;
+  const pages = [];
+  for (let i = Math.max(1, page - delta); i <= Math.min(totalPages, page + delta); i++) pages.push(i);
+  nums.innerHTML = pages.map(p => `<button class="page-btn ${p===page?'active':''}" onclick="goPage(${p})">${p}</button>`).join('');
+}
+
+function goPage(p) {
+  p = Math.max(1, Math.min(p, state.totalPages));
+  if (p === state.page) return;
+  state.page = p; renderTable(); renderPagination();
+}
+
+function setPerPage(n) {
+  state.perPage = n; state.page = 1;
+  state.totalPages = Math.max(1, Math.ceil(state.filtered.length / n));
+  renderTable(); renderPagination();
+}
+
+// ── Selection ─────────────────────────────────────────────────────
+function toggleSelect(idx, cb) {
+  if (cb.checked) state.selected.add(idx); else state.selected.delete(idx);
+  updateBulkBar();
+  cb.closest('tr').classList.toggle('selected', cb.checked);
+}
+function toggleAll(cb) {
+  const start = (state.page - 1) * state.perPage;
+  state.filtered.slice(start, start + state.perPage).forEach(t => {
+    if (cb.checked) state.selected.add(t.index); else state.selected.delete(t.index);
+  });
+  renderTable(); updateBulkBar();
+}
+function clearSelection() {
+  state.selected.clear(); renderTable(); updateBulkBar();
+  document.getElementById('check-all').checked = false;
+}
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  document.getElementById('bulk-count').textContent = `已选 ${state.selected.size} 项`;
+  bar.classList.toggle('visible', state.selected.size > 0);
+}
+
+// ── Copy ──────────────────────────────────────────────────────────
+function copyText(s) { navigator.clipboard.writeText(s).catch(()=>{}); toast('已复制'); }
+
+// ── Actions ───────────────────────────────────────────────────────
+async function refreshOne(idx, btn) {
+  if (btn) btn.disabled = true;
+  try {
+    const data = await api('POST', `/admin/tokens/${idx}/refresh`);
+    const t = state.tokens.find(t => t.index === idx);
+    if (t && data.token) { Object.assign(t, data.token); renderTable(); updateFilterCounts(); updateStats(data.summary); }
+    toast('刷新完成', 'success');
+  } catch(e) { toast(`刷新失败: ${e.message}`, 'error'); }
+  finally { if (btn) btn.disabled = false; }
+}
+
+async function deleteOne(idx) {
+  if (!confirm('确认永久删除该账号？')) return;
+  try {
+    await api('DELETE', `/admin/tokens/${idx}`);
+    state.tokens = state.tokens.filter(t => t.index !== idx);
+    state.selected.delete(idx);
+    applyFilter(); updateFilterCounts(); updateBulkBar();
+    toast('已删除', 'success');
+  } catch(e) { toast(`删除失败: ${e.message}`, 'error'); }
+}
+
+async function bulkRefresh() {
+  const ids = [...state.selected];
+  if (!ids.length) return;
+  toast(`正在刷新 ${ids.length} 个账号...`);
+  try {
+    await api('POST', '/admin/tokens/bulk/refresh', { indexes: ids });
+    toast(`已刷新 ${ids.length} 个`, 'success');
+    clearSelection(); await fetchData();
+  } catch(e) { toast(`刷新失败: ${e.message}`, 'error'); }
+}
+
+async function bulkDelete() {
+  const ids = [...state.selected];
+  if (!confirm(`将永久删除 ${ids.length} 个账号，确认？`)) return;
+  try {
+    const data = await api('POST', '/admin/tokens/bulk/delete', { indexes: ids });
+    toast(`已删除 ${data.removed} 个`, 'success');
+    state.tokens = state.tokens.filter(t => !state.selected.has(t.index));
+    clearSelection(); applyFilter(); updateFilterCounts();
+  } catch(e) { toast(`删除失败: ${e.message}`, 'error'); }
+}
+
+async function bulkDisable() {
+  const ids = [...state.selected];
+  try {
+    await api('POST', '/admin/tokens/bulk/disable', { indexes: ids });
+    toast(`已禁用 ${ids.length} 个`, 'success');
+    clearSelection(); await fetchData();
+  } catch(e) { toast(`操作失败: ${e.message}`, 'error'); }
+}
+
+async function bulkEnable() {
+  const ids = [...state.selected];
+  try {
+    await api('POST', '/admin/tokens/bulk/enable', { indexes: ids });
+    toast(`已启用 ${ids.length} 个`, 'success');
+    clearSelection(); await fetchData();
+  } catch(e) { toast(`操作失败: ${e.message}`, 'error'); }
+}
+
+// ── Import ────────────────────────────────────────────────────────
+function openImport() {
+  document.getElementById('import-modal').classList.add('open');
+  setTimeout(() => document.getElementById('import-textarea').focus(), 50);
+}
+
+async function doImport() {
+  const raw = document.getElementById('import-textarea').value.trim();
+  const hint = document.getElementById('import-hint');
+  if (!raw) return;
+  let tokens;
+  try { tokens = JSON.parse(raw); } catch(e) {
+    hint.textContent = '❌ JSON 格式错误，请检查'; hint.style.color = 'var(--red)'; return;
+  }
+  if (!Array.isArray(tokens)) tokens = [tokens];
+  const btn = document.getElementById('import-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    const data = await api('POST', '/admin/tokens/add', { tokens });
+    toast(`成功导入 ${data.added} 个，跳过 ${data.skipped} 个`, 'success');
+    closeModal('import-modal'); await fetchData();
+  } catch(e) {
+    hint.textContent = `❌ ${e.message}`; hint.style.color = 'var(--red)';
+  } finally { btn.disabled = false; btn.textContent = '导入'; }
+}
+
+// ── Register ──────────────────────────────────────────────────────
+function openRegisterModal() {
+  document.getElementById('register-modal').classList.add('open');
+  document.getElementById('register-hint').textContent = '任务在后台运行，完成后自动写入账号池。';
+  document.getElementById('register-hint').style.color = 'var(--text-secondary)';
+  document.getElementById('register-progress-wrap').style.display = 'none';
+  setTimeout(() => document.getElementById('register-count').focus(), 50);
+}
+
+async function doRegister() {
+  const count = parseInt(document.getElementById('register-count').value, 10);
+  const conc  = parseInt(document.getElementById('register-concurrency').value, 10) || 2;
+  const hint  = document.getElementById('register-hint');
+
+  if (!count || count < 1) {
+    hint.textContent = '❌ 请输入大于 0 的整数'; hint.style.color = 'var(--red)'; return;
+  }
+
+  const btn     = document.getElementById('register-btn');
+  const btnText = document.getElementById('register-btn-text');
+  btn.disabled  = true;
+  btnText.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    const data = await api('POST', '/admin/register/start', { count, concurrency: conc });
+    hint.textContent = `✅ ${data.message}`;
+    hint.style.color = 'var(--green)';
+    document.getElementById('register-progress-wrap').style.display = 'block';
+
+    // 轮询进度
+    const before = state.tokens.length;
+    let polls = 0;
+    const interval = setInterval(async () => {
+      polls++;
+      try {
+        const status = await api('GET', '/admin/register/status');
+        const added = status.total_accounts - before;
+        const pct = Math.min((added / count) * 100, 100);
+        document.getElementById('register-progress').style.width = pct + '%';
+        hint.textContent = `进行中... 已完成 ${added}/${count}`;
+        if (added >= count || polls > 120) {
+          clearInterval(interval);
+          hint.textContent = `✅ 注册完成，共添加 ${added} 个账号`;
+          await fetchData();
+        }
+      } catch(e) { clearInterval(interval); }
+    }, 3000);
+
+    toast(`注册任务已启动，目标 ${count} 个账号`, 'success');
+  } catch(e) {
+    hint.textContent = `❌ 启动失败: ${e.message}`; hint.style.color = 'var(--red)';
+  } finally {
+    btn.disabled = false; btnText.textContent = '开始注册';
+  }
+}
+
+// ── Modal ─────────────────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('base-url').value = window.location.origin;
+  ['import-modal','register-modal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeModal(id);
+    });
+  });
+});
+</script>
+</body>
+</html>

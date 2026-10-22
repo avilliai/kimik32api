@@ -1,3 +1,5 @@
-fastapi
+﻿fastapi
 uvicorn
 curl_cffi
+python-dotenv
+requests

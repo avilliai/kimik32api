@@ -1,6 +1,4 @@
-ACCOUNT_QUOTA = 10
-
-class AccountState:
+﻿class AccountState:
     def __init__(self, d: dict, index: int = 1):
         self.index = index
         self.email = d.get("email", "")
@@ -14,16 +12,14 @@ class AccountState:
         self.fail_count = d.get("fail_count", 0)
 
     @property
-    def remaining(self) -> int:
-        return max(0, ACCOUNT_QUOTA - self.usage_count)
-
-    @property
     def is_alive(self) -> bool:
-        return self.healthy and not self.disabled and self.remaining > 0
+        """账号是否可用：未被禁用且健康即为可用，不设本地虚拟配额"""
+        return self.healthy and not self.disabled
 
     @property
-    def quota_exhausted(self) -> bool:
-        return self.usage_count >= ACCOUNT_QUOTA
+    def remaining(self) -> int:
+        """兼容面板显示，不限制存活"""
+        return 999999
 
     @property
     def token_hint(self) -> str:
@@ -31,15 +27,17 @@ class AccountState:
             return "N/A"
         for part in self.cookie_str.split(";"):
             part = part.strip()
-            if part.startswith("next-auth.session-token=") or part.startswith("__Secure-authjs.session-token="):
-                val = part.split("=", 1)[1]
-                if len(val) > 20: return f"{val[:10]}...{val[-10:]}"
-                return val
-        # 如果找不到特定键，返回截断的全部 Cookie
-        return f"{self.cookie_str[:10]}...{self.cookie_str[-10:]}" if len(self.cookie_str)>20 else self.cookie_str
+            if "=" in part:
+                k, val = part.split("=", 1)
+                if "session" in k.lower():
+                    if len(val) > 20:
+                        return f"{val[:10]}...{val[-10:]}"
+                    return val
+        return f"{self.cookie_str[:10]}...{self.cookie_str[-10:]}" if len(self.cookie_str) > 20 else self.cookie_str
 
     def cookies_dict(self) -> dict:
-        if not self.cookie_str: return {}
+        if not self.cookie_str:
+            return {}
         res = {}
         for part in self.cookie_str.split(";"):
             part = part.strip()
@@ -49,9 +47,8 @@ class AccountState:
         return res
 
     def increment_usage(self) -> None:
+        """仅累计调用次数，不设本地上限，账号生死完全由上游服务端实际反馈决定"""
         self.usage_count += 1
-        if self.quota_exhausted:
-            self.disabled = True
 
     def to_dict(self) -> dict:
         return {
