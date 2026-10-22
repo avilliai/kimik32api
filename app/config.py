@@ -6,6 +6,9 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# 运行端口
+PORT = int(os.getenv("PORT", "8077"))
+
 # 文件路径
 TOKENS_FILE = BASE_DIR / "kimik3_tokens.json"
 

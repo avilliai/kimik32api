@@ -1,0 +1,26 @@
+﻿__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# 虚拟环境
+.venv/
+venv/
+ENV/
+
+# 编辑器与系统文件
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# 敏感配置文件与账号数据文件
+.env
+kimik3_tokens.json*
+outlook_live_*.txt
+outlook_pointer.json
+
+# 测试临时文件
+smoke_test.py
+test*.py

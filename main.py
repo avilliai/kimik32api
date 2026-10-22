@@ -11,6 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.routers import admin, chat, model_list
 from app.cookie_manager import cm
+from app.config import PORT
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
@@ -49,7 +50,8 @@ async def lifespan(app: FastAPI):
     bg_task.cancel()
 
 
-app = FastAPI(title="Kimik3 Proxy", lifespan=lifespan)
+app = FastAPI(title="Kimik3 to OpenAI Proxy", lifespan=lifespan)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -80,4 +82,4 @@ async def health():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8077, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="info")
